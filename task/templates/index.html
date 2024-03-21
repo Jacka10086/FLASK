@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <title>Flask App Home</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+        }
+        h1 {
+            color: #007bff;
+        }
+        .btn {
+            margin: 0.5rem; /* 按钮间距 */
+        }
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            background-color: #fff;
+            box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, 0.1);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Welcome to Flask!</h1>
+        <p class="text-center">This is the home page. Use the navigation to go to different pages.</p>
+        <div class="text-center">
+            {% if logged_in %}
+                <span>Welcome, {{ email }}!</span>
+                <a href="/logout" class="btn btn-secondary">Logout</a>
+                <a href="/profile" class="btn btn-secondary">Profile</a>
+                <a href="/comments" class="btn btn-secondary">Comments</a>
+
+            {% else %}
+                <a href="/register" class="btn btn-primary">Register</a>
+                <a href="/login" class="btn btn-secondary">Login</a>
+            {% endif %}
+            
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

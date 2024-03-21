@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <title>User Profile</title>
+    <style>
+        /* 添加所需的 CSS 样式 */
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="text-right">
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+            <a href="/edit_profile" class="btn btn-secondary">Edit Profile</a>
+            <a href="/change_password" class="btn btn-secondary">Change Password</a>
+        </div>
+        <h1 class="text-center">Profile Page</h1>
+        <div class="profile-info text-center">
+            <!-- 使用 session 中的信息显示用户邮箱 -->
+            <p>Email: {{ session['email'] }}</p>
+        </div>
+        <div class="actions text-center">
+            <!-- 用户的操作选项 -->
+            <p><a href="/edit_profile">Edit Profile</a></p>
+            <p><a href="/change_password">Change Password</a></p>
+            <p><a href="/logout">Logout</a></p>
+        </div>
+        <div class="upload-profile-picture text-center">
+            <form action="/upload_profile_picture" method="post" enctype="multipart/form-data">
+                <label for="profile_picture">Upload Profile Picture</label>
+                <input type="file" name="profile_picture" id="profile_picture" required>
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

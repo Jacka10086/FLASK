@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Feedback</h1>
+        <form action="{{ url_for('feedback') }}" method="POST">
+            <div class="form-group">
+                <label for="feedbackInput">Feedback:</label>
+                <input type="text" class="form-control" id="nameInput" name="feedback" placeholder="Enter your Feedback" required>
+            </div>
+        
+           
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

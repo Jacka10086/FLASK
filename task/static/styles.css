@@ -1,0 +1,19 @@
+body {
+    display: flex; /* 启用Flexbox布局 */
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; /* 视口高度，确保body占满整个屏幕 */
+    margin: 0; 
+    background-color: #f0f2f5; 
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* 现代字体 */
+}
+
+.container {
+    max-width: 800px; /* 限制最大宽度 */
+    padding: 20px; /* 添加内边距 */
+    background-color: #ffffff; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 轻微的阴影效果 */
+    border-radius: 8px; /* 圆角边框 */
+    transform: translateY(-150px); /* 向上移动 */
+}
+
