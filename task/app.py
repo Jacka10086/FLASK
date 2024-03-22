@@ -71,10 +71,11 @@ def register():
         finally:
             cursor.close()
             connection.close()
+        session['email'] = email
+        session['logged_in'] = True
         flash('Registration successful!')
         return redirect(url_for('home'))
     return render_template('register.html')
-
 
 def get_db_cursor():
     db = mysql.connector.connect(**db_config)
