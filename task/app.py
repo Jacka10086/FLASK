@@ -9,14 +9,14 @@ import mysql.connector
 
 
 db_config = {
-    'user': 'root',
-    'password': '',
-    'host': 'localhost',
-    'port': '8889',
-    'database': 'Bank'  # Replace with your actual database name
+  'user': 'root',
+  'password': 'root',
+  'host': 'localhost',
+  'port': 3306,
+  'database': 'bank',
+  'raise_on_warnings': True,
 }
-
-db = mysql.connector.connect(**db_config)
+link = mysql.connector.connect(**db_config)
 
 app = Flask(__name__)
 app.secret_key = '123456'
@@ -27,6 +27,15 @@ def home():
     logged_in = 'email' in session
     return render_template('index.html', logged_in=logged_in, email=session.get('email'))
 
+# 确保数据库配置正确
+db_config = {
+    'user': 'root',
+    'password': 'root',
+    'host': 'localhost',
+    'port': 3306,
+    'database': 'bank',
+    'raise_on_warnings': True,
+}
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -37,21 +46,39 @@ def register():
             v = validate_email(email)  # validate and get info
             email = v["email"]  # replace with normalized form
         except EmailNotValidError as e:
-            # email is not valid, handle exception
-            return str(e), 400
+            flash('Invalid email address!')
+            return render_template('register.html'), 400
         if not password:
-            return 'Password is required!', 400
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        result = cursor.fetchone()
-        if result:
-            return 'Email already exists!'
-        hashed_password = generate_password_hash(password)
-        cursor.execute("INSERT INTO users (email, password, profile_picture) VALUES (%s, %s, %s)", (email, hashed_password, 'default.jpg'))        
-        db.commit()
-        return 'Registration successful!'
+            flash('Password is required!')
+            return render_template('register.html'), 400
+        
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        
+        try:
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            result = cursor.fetchone()
+            if result:
+                flash('Email already exists!')
+                return render_template('register.html'), 400
+            hashed_password = generate_password_hash(password)
+            cursor.execute("INSERT INTO users (email, Password) VALUES (%s, %s)", (email, hashed_password))  # 注意列名的大小写
+            connection.commit()
+        except mysql.connector.Error as err:
+            flash('An error occurred during registration. Please try again.')
+            print("Something went wrong: {}".format(err))
+            return render_template('register.html'), 500
+        finally:
+            cursor.close()
+            connection.close()
+        flash('Registration successful!')
+        return redirect(url_for('home'))
     return render_template('register.html')
 
+
+def get_db_cursor():
+    db = mysql.connector.connect(**db_config)
+    return db.cursor()
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -61,26 +88,31 @@ def login():
         if not email or not password:
             flash('Email and password are required!')
             return render_template('login.html'), 400
-        
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        result = cursor.fetchone()
-        cursor.close()  # It's good practice to close the cursor when you're done with it
 
-        if not result:
-            flash('Email not found!')
-            return render_template('login.html'), 404
-        
-        hashed_password = result[2]  # Assuming the password is at index 2
-        if check_password_hash(hashed_password, password):
-            session['email'] = email
-            session['logged_in'] = True  # This line marks the user as logged in
-            return redirect(url_for('home'))  # Redirect to the home page after successful login
-        else:
-            flash('Incorrect password!')
-            return render_template('login.html'), 401
-    
-    # This is outside the 'POST' check, so it handles 'GET' requests
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            result = cursor.fetchone()
+            if not result:
+                flash('Email not found!')
+                return render_template('login.html'), 404
+            
+            hashed_password = result[1]  # 假设密码在第二列
+            if check_password_hash(hashed_password, password):
+                session['email'] = email
+                session['logged_in'] = True
+                return redirect(url_for('home'))
+            else:
+                flash('Incorrect password!')
+                return render_template('login.html'), 401
+        except mysql.connector.Error as err:
+            flash('An error occurred. Please try again.')
+            print("Something went wrong: {}".format(err))
+        finally:
+            cursor.close()
+            connection.close()
     return render_template('login.html')
 
 
@@ -107,8 +139,8 @@ def get_db_connection():
     return mysql.connector.connect(
         host='localhost',
         user='root',
-        password='12345',
-        database='Bank'
+        password='root',
+        database='bank'
     )
 
 @app.route('/comments')
