@@ -152,12 +152,16 @@ def comments():
     
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM comments_template")
+    cursor.execute("SELECT * FROM comments")
     comment_list = cursor.fetchall()
     cursor.close()
     connection.close()
 
+    # 直接传递comment_list到模板，不需要分组
     return render_template('comments.html', comments=comment_list)
+
+
+
 
 @app.route('/submit_comments', methods=['POST'])
 def submit_comments():
