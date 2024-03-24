@@ -137,77 +137,63 @@ def get_db_connection():
 
 @app.route('/comments')
 def comments():
+    if 'logged_in' not in session:
+        flash('You need to be logged in to view comments.')
+        return redirect(url_for('login'))
     
-    # 获取数据库连接
     connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)  # 使用字典格式的游标
-
+    cursor = connection.cursor(dictionary=True)
+    
     try:
-        # 从abstracts表中检索数据
         cursor.execute("SELECT * FROM abstracts")
         abstracts_data = cursor.fetchall()
-        
-        # 从introductory_materials表中检索数据
         cursor.execute("SELECT * FROM introductory_materials")
         intro_data = cursor.fetchall()
-        
     except mysql.connector.Error as err:
-        # 如果检索过程中出错，则显示错误信息，并设置空列表
         flash('An error occurred while fetching comments: {}'.format(err))
-        abstracts_data = []
-        intro_data = []
+        abstracts_data, intro_data = [], []
     finally:
-        # 关闭游标和连接
         cursor.close()
         connection.close()
 
-    # 将检索到的数据传递给模板
     return render_template('comments.html', abstracts=abstracts_data, intro=intro_data)
-
-
-
-
 
 @app.route('/submit_comments', methods=['POST'])
 def submit_comments():
     if 'logged_in' not in session:
-        # 如果用户未登录，重定向到登录页面
         flash('You need to be logged in to submit comments.')
         return redirect(url_for('login'))
     
-    # 从表单获取数据
+    email = session['email']
     abstracts_ids = request.form.getlist('abstracts_ids')
     intros_ids = request.form.getlist('intros_ids')
-    email = session.get('email')  # 从会话中获取用户的邮箱地址
-
+    
     connection = get_db_connection()
     cursor = connection.cursor()
-
+    
     try:
-        # 遍历所有选中的abstracts IDs，并将它们插入到submitted_comments表中
         for abstract_id in abstracts_ids:
             cursor.execute(
-                "INSERT INTO submitted_comments (email, abstracts_and_executive_summaries) VALUES (%s, (SELECT content FROM abstracts WHERE id = %s))",
+                "INSERT INTO submitted_comments (email, abstracts_and_executive_summaries) SELECT %s, content FROM abstracts WHERE id = %s",
                 (email, abstract_id)
             )
         
-        # 遍历所有选中的intros IDs，并将它们插入到submitted_comments表中
         for intro_id in intros_ids:
             cursor.execute(
-                "INSERT INTO submitted_comments (email, introductory_material) VALUES (%s, (SELECT content FROM introductory_materials WHERE id = %s))",
+                "INSERT INTO submitted_comments (email, introductory_material) SELECT %s, content FROM introductory_materials WHERE id = %s",
                 (email, intro_id)
             )
         
-        connection.commit()  # 提交事务
+        connection.commit()
         flash('Comments submitted successfully.')
     except mysql.connector.Error as err:
         flash('An error occurred while submitting your comments: {}'.format(err))
-        connection.rollback()  # 如果出错，则回滚事务
+        connection.rollback()
     finally:
         cursor.close()
         connection.close()
-
-    return redirect(url_for('home'))  # 提交成功后，重定向到首页
+    
+    return redirect(url_for('home'))
 
 
 @app.route('/view_comments')

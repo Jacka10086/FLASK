@@ -6,23 +6,30 @@
 </head>
 <body>
     <h1>Comments</h1>
+    <!-- 确保表单的 action 属性正确 -->
     <form method="post" action="{{ url_for('submit_comments') }}">
         <div>
             <h2>Abstracts and Executive Summaries</h2>
-            {% for item in abstracts %}
-            <input type="checkbox" name="abstract_ids" value="{{ item.id }}">
-            <label>{{ item.content }}</label><br>
+            {% for abstract in abstracts %}
+            <!-- 更新复选框的 name 属性以匹配 Flask 视图中的名称 -->
+            <input type="checkbox" name="abstracts_ids" value="{{ abstract.id }}">
+            <!-- 添加 for 属性到 label 标签，关联复选框的 id -->
+            <label for="abstract_{{ abstract.id }}">{{ abstract.content }}</label><br>
             {% endfor %}
         </div>
 
         <div>
             <h2>Introductory Material</h2>
             {% for item in intro %}
-            <input type="checkbox" name="intro_ids" value="{{ item.id }}">
-            <label>{{ item.content }}</label><br>
+                <input type="checkbox" name="intros_ids" value="{{ item.id }}">
+                <label for="intro_{{ item.id }}">{{ item.content }}</label><br>
+            {% else %}
+                <p>No introductory materials found.</p>
             {% endfor %}
         </div>
         
+        
+        <!-- 确保提交按钮的类型是 submit -->
         <input type="submit" value="Submit Selected Comments">
     </form>
 </body>
