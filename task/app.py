@@ -202,21 +202,34 @@ def view_comments():
         flash('You need to be logged in to view this page.')
         return redirect(url_for('login'))
     
-    email = session.get('email')  # 获取当前登录的用户邮箱
+    email = session.get('email')
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-
+    
     try:
         cursor.execute("SELECT * FROM submitted_comments WHERE email = %s", (email,))
         comments_data = cursor.fetchall()
+        
+        for comment in comments_data:
+            for field in ['abstracts_and_executive_summaries', 'introductory_material']:
+                if comment[field] is None:
+                    comment[field] = ''
+                else:
+                    # 移除破折号及其后面的空格
+                    comment[field] = comment[field].replace(' - ', '')
+                    # 如果结果是空字符串，也要替换
+                    if comment[field] == '-':
+                        comment[field] = ''
+
     except mysql.connector.Error as err:
         flash('An error occurred while fetching the comments: {}'.format(err))
         comments_data = []
     finally:
         cursor.close()
         connection.close()
-
+    
     return render_template('view_comments.html', comments=comments_data)
+
 
 
 
