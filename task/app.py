@@ -161,77 +161,69 @@ def comments():
 @app.route('/submit_comments', methods=['POST'])
 def submit_comments():
     if 'logged_in' not in session:
-        flash('You need to be logged in to submit comments.')
+        flash('请先登录再提交评论。')
         return redirect(url_for('login'))
     
-    email = session['email']
-    abstracts_ids = request.form.getlist('abstracts_ids')
-    intros_ids = request.form.getlist('intros_ids')
-    
+    email = session['email']  # 从会话中获取用户邮箱
+    abstracts_ids = request.form.getlist('abstracts_ids')  # 获取选中的摘要ID
+    intros_ids = request.form.getlist('intros_ids')  # 获取选中的介绍材料ID
+
     connection = get_db_connection()
     cursor = connection.cursor()
-    
+
     try:
+        # 遍历所有选中的摘要ID，并插入到abstracts_comments表中
         for abstract_id in abstracts_ids:
             cursor.execute(
-                "INSERT INTO submitted_comments (email, abstracts_and_executive_summaries) SELECT %s, content FROM abstracts WHERE id = %s",
+                "INSERT INTO abstracts_comments (email, content) SELECT %s, content FROM abstracts WHERE id = %s",
                 (email, abstract_id)
             )
-        
+
+        # 遍历所有选中的介绍材料ID，并插入到introductory_comments表中
         for intro_id in intros_ids:
             cursor.execute(
-                "INSERT INTO submitted_comments (email, introductory_material) SELECT %s, content FROM introductory_materials WHERE id = %s",
+                "INSERT INTO introductory_comments (email, content) SELECT %s, content FROM introductory_materials WHERE id = %s",
                 (email, intro_id)
             )
-        
-        connection.commit()
-        flash('Comments submitted successfully.')
+
+        connection.commit()  # 提交事务
+        flash('评论提交成功。')
     except mysql.connector.Error as err:
-        flash('An error occurred while submitting your comments: {}'.format(err))
-        connection.rollback()
+        flash(f'提交评论时发生错误：{err}')
+        connection.rollback()  # 如果出现错误则回滚事务
     finally:
-        cursor.close()
-        connection.close()
-    
+        cursor.close()  # 关闭游标
+        connection.close()  # 关闭数据库连接
+
     return redirect(url_for('home'))
+
+
 
 
 @app.route('/view_comments')
 def view_comments():
     if 'logged_in' not in session:
-        flash('You need to be logged in to view this page.')
+        flash('请先登录再查看评论。')
         return redirect(url_for('login'))
-    
-    email = session.get('email')
+
+    email = session['email']
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-    
-    try:
-        cursor.execute("SELECT * FROM submitted_comments WHERE email = %s", (email,))
-        comments_data = cursor.fetchall()
-        
-        for comment in comments_data:
-            for field in ['abstracts_and_executive_summaries', 'introductory_material']:
-                if comment[field] is None:
-                    comment[field] = ''
-                else:
-                    # 移除破折号及其后面的空格
-                    comment[field] = comment[field].replace(' - ', '')
-                    # 如果结果是空字符串，也要替换
-                    if comment[field] == '-':
-                        comment[field] = ''
 
+    try:
+        cursor.execute("SELECT content FROM abstracts_comments WHERE email = %s", (email,))
+        abstracts_comments = cursor.fetchall()
+        cursor.execute("SELECT content FROM introductory_comments WHERE email = %s", (email,))
+        intros_comments = cursor.fetchall()
     except mysql.connector.Error as err:
-        flash('An error occurred while fetching the comments: {}'.format(err))
-        comments_data = []
+        flash(f'获取评论时发生错误：{err}')
+        abstracts_comments = []
+        intros_comments = []
     finally:
         cursor.close()
         connection.close()
-    
-    return render_template('view_comments.html', comments=comments_data)
 
-
-
+    return render_template('view_comments.html', abstracts_comments=abstracts_comments, intros_comments=intros_comments)
 
 
 

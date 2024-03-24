@@ -5,15 +5,28 @@
     <title>View Comments</title>
 </head>
 <body>
-    <h1>Submitted Comments</h1>
-    {% if comments %}
+    <h1>View Comments</h1>
+    
+    <h2>Abstracts and Executive Summaries Comments</h2>
+    {% if abstracts_comments %}
         <ul>
-            {% for comment in comments %}
-                <li>{{ comment.abstracts_and_executive_summaries }} - {{ comment.introductory_material }}</li>
+            {% for comment in abstracts_comments %}
+                <li>{{ comment.content }}</li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No comments to display.</p>
+        <p>No comments for abstracts and executive summaries.</p>
+    {% endif %}
+
+    <h2>Introductory Material Comments</h2>
+    {% if intros_comments %}
+        <ul>
+            {% for comment in intros_comments %}
+                <li>{{ comment.content }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments for introductory materials.</p>
     {% endif %}
 </body>
 </html>
