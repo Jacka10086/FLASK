@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Comments</title>
+</head>
+<body>
+    <h1>Submitted Comments</h1>
+    {% if comments %}
+        <ul>
+            {% for comment in comments %}
+                <li>{{ comment.abstracts_and_executive_summaries }} - {{ comment.introductory_material }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments to display.</p>
+    {% endif %}
+</body>
+</html>

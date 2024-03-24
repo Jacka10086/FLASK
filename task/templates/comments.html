@@ -6,27 +6,22 @@
 </head>
 <body>
     <h1>Comments</h1>
-    
-    <form action="{{ url_for('submit_comments') }}" method="post">
-        <h2>Abstracts and Executive Summaries</h2>
-        {% for comment in comments %}
-            {% if loop.index > 1 %} <!-- Skip the first row which is the title -->
-                <div>
-                    <input type="checkbox" name="comment_ids" value="{{ loop.index }}"> <!-- Assuming you want to use the loop index as value -->
-                    {{ comment.abstracts_and_executive_summaries }}
-                </div>
-            {% endif %}
-        {% endfor %}
-        
-        <h2>Introductory Material</h2>
-        {% for comment in comments %}
-            {% if loop.index > 1 %} <!-- Skip the first row which is the title -->
-                <div>
-                    <input type="checkbox" name="comment_ids" value="{{ loop.index }}"> <!-- Assuming you want to use the loop index as value -->
-                    {{ comment.introductory_material }}
-                </div>
-            {% endif %}
-        {% endfor %}
+    <form method="post" action="{{ url_for('submit_comments') }}">
+        <div>
+            <h2>Abstracts and Executive Summaries</h2>
+            {% for item in abstracts %}
+            <input type="checkbox" name="abstract_ids" value="{{ item.id }}">
+            <label>{{ item.content }}</label><br>
+            {% endfor %}
+        </div>
+
+        <div>
+            <h2>Introductory Material</h2>
+            {% for item in intro %}
+            <input type="checkbox" name="intro_ids" value="{{ item.id }}">
+            <label>{{ item.content }}</label><br>
+            {% endfor %}
+        </div>
         
         <input type="submit" value="Submit Selected Comments">
     </form>
